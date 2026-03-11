@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  role          Role      @default(STAFF)
+  orders        Order[]   @relation("AssignedUser")
+  activities    Activity[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  STAFF
+}
+
+model Client {
+  id                String   @id @default(cuid())
+  fullName          String
+  email             String?
+  phone             String?
+  country           String?
+  companyName       String?
+  instagramUsername String?
+  tiktokUsername    String?
+  facebookProfile   String?
+  preferredLanguage String?
+  notes             String?  @db.Text
+  orders            Order[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Service {
+  id                   String   @id @default(cuid())
+  name                 String
+  slug                 String   @unique
+  category             String?
+  platform             Platform
+  description          String?
+  defaultPrice         Decimal? @db.Decimal(10, 2)
+  defaultCost          Decimal? @db.Decimal(10, 2)
+  estimatedDelivery    String?
+  isActive             Boolean  @default(true)
+  requiresTargetUser   Boolean  @default(false)
+  requiresEmail        Boolean  @default(false)
+  requiresPhone        Boolean  @default(false)
+  requiresCaseNotes    Boolean  @default(false)
+  orders               Order[]
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+enum Platform {
+  INSTAGRAM
+  TIKTOK
+  FACEBOOK
+  OTHER
+}
+
+model Order {
+  id               String        @id @default(cuid())
+  orderNumber      Int           @unique @default(autoincrement())
+  clientId         String
+  client           Client        @relation(fields: [clientId], references: [id])
+  serviceId        String
+  service          Service       @relation(fields: [serviceId], references: [id])
+  
+  platform         Platform
+  targetUsername   String?
+  targetEmail      String?
+  targetPhone      String?
+  profileUrl       String?
+  
+  quoteAmount      Decimal       @db.Decimal(10, 2)
+  internalCost     Decimal       @db.Decimal(10, 2)
+  currency         String        @default("USD")
+  
+  paymentStatus    PaymentStatus @default(UNPAID)
+  quoteStatus      QuoteStatus   @default(DRAFT)
+  status           OrderStatus   @default(NEW_REQUEST)
+  priority         Priority      @default(NORMAL)
+  
+  source           String?       // WhatsApp, Instagram, etc.
+  intakeNotes      String?       @db.Text
+  
+  assignedUserId   String?
+  assignedUser     User?         @relation("AssignedUser", fields: [assignedUserId], references: [id])
+  
+  notes            Note[]
+  activities       Activity[]
+  
+  dueDate          DateTime?
+  completedAt      DateTime?
+  cancelledAt      DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+enum QuoteStatus { DRAFT, QUOTE_SENT, QUOTE_ACCEPTED, QUOTE_REJECTED, QUOTE_EXPIRED }
+enum PaymentStatus { UNPAID, PARTIAL, PAID, REFUNDED }
+enum OrderStatus { NEW_REQUEST, QUALIFYING, WAITING_QUOTE_APPROVAL, QUOTE_ACCEPTED, PAYMENT_PENDING, READY_TO_START, IN_PROGRESS, WAITING_PROVIDER, WAITING_CLIENT, ON_HOLD, COMPLETED, FAILED, CANCELLED }
+enum Priority { LOW, NORMAL, HIGH, URGENT }
+
+model Note {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  authorId  String
+  isPinned  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  type      String   // "STATUS_CHANGE", "NOTE_ADDED", etc.
+  description String
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
