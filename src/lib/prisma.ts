@@ -3,6 +3,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
 const connectionString = `${process.env.DATABASE_URL}`;
+const shouldUseTls =
+  /supabase\.co/i.test(connectionString) || /sslmode=require/i.test(connectionString);
 
 const globalForPrisma = global as unknown as {
   prisma: PrismaClient | undefined,
@@ -10,7 +12,10 @@ const globalForPrisma = global as unknown as {
 };
 
 // Use a singleton for the Pool as well to avoid too many connections in dev
-const pool = globalForPrisma.pgPool || new Pool({ connectionString });
+const pool = globalForPrisma.pgPool || new Pool({
+  connectionString,
+  ...(shouldUseTls ? { ssl: { rejectUnauthorized: false } } : {}),
+});
 if (process.env.NODE_ENV !== "production") globalForPrisma.pgPool = pool;
 
 // Cast to any to bypass the strict type mismatch between different versions of @types/pg
