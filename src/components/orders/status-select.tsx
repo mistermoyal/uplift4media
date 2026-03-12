@@ -1,6 +1,5 @@
 "use client";
 
-import { OrderStatus } from "@prisma/client";
 import {
     Select,
     SelectContent,
@@ -14,10 +13,11 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getOrderStatusMeta } from "@/lib/order-status";
+import type { OrderStatusValue } from "@/lib/client-enums";
 
 interface StatusSelectProps {
     orderId: string;
-    currentStatus: OrderStatus;
+    currentStatus: OrderStatusValue;
     userId: string;
 }
 
@@ -28,11 +28,11 @@ const primaryStatusOptions = [
     "COMPLETED",
     "ON_HOLD",
     "CANCELLED",
-] as OrderStatus[];
+] as OrderStatusValue[];
 
 export function StatusSelect({ orderId, currentStatus, userId }: StatusSelectProps) {
     const [loading, setLoading] = useState(false);
-    const [selectedStatus, setSelectedStatus] = useState<OrderStatus>(currentStatus);
+    const [selectedStatus, setSelectedStatus] = useState<OrderStatusValue>(currentStatus);
 
     useEffect(() => {
         setSelectedStatus(currentStatus);
@@ -41,12 +41,12 @@ export function StatusSelect({ orderId, currentStatus, userId }: StatusSelectPro
     const statusOptions = (primaryStatusOptions.includes(selectedStatus)
         ? primaryStatusOptions
         : [selectedStatus, ...primaryStatusOptions]
-    ).filter((status): status is OrderStatus => Boolean(status));
+    ).filter((status): status is OrderStatusValue => Boolean(status));
 
-    const onStatusChange = async (newStatus: OrderStatus, previousStatus: OrderStatus) => {
+    const onStatusChange = async (newStatus: OrderStatusValue, previousStatus: OrderStatusValue) => {
         setLoading(true);
         try {
-            await updateOrderStatus(orderId, newStatus, userId);
+            await updateOrderStatus(orderId, newStatus as Parameters<typeof updateOrderStatus>[1], userId);
             toast.success("Status updated");
         } catch {
             setSelectedStatus(previousStatus);
@@ -61,7 +61,7 @@ export function StatusSelect({ orderId, currentStatus, userId }: StatusSelectPro
             <Select
                 value={selectedStatus}
                 onValueChange={(v) => {
-                    const nextStatus = v as OrderStatus;
+                    const nextStatus = v as OrderStatusValue;
                     const previousStatus = selectedStatus;
                     setSelectedStatus(nextStatus);
                     void onStatusChange(nextStatus, previousStatus);

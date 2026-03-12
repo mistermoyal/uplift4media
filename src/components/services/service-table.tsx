@@ -11,7 +11,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Service, Platform } from "@prisma/client";
+import type { Service } from "@prisma/client";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +33,7 @@ import {
 import { ServiceForm } from "@/components/services/service-form";
 import { deleteService } from "@/lib/actions/services";
 import { toast } from "sonner";
+import type { PlatformValue } from "@/lib/client-enums";
 
 interface ServiceTableProps {
     services: Service[];
@@ -43,7 +44,7 @@ export function ServiceTable({ services }: ServiceTableProps) {
     const [editingService, setEditingService] = useState<Service | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    const platformColors: Record<Platform, string> = {
+    const platformColors: Record<PlatformValue, string> = {
         INSTAGRAM: "bg-pink-500/10 text-pink-500 border-pink-500/20",
         TIKTOK: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
         FACEBOOK: "bg-blue-500/10 text-blue-500 border-blue-500/20",

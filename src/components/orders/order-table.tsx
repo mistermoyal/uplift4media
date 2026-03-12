@@ -32,12 +32,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { format } from "date-fns";
-import { OrderStatus } from "@prisma/client";
 import { cn } from "@/lib/utils";
 import { deleteOrder } from "@/lib/actions/orders";
 import { toast } from "sonner";
 import { getProfileDisplay, getProfileUrl } from "@/lib/profile-links";
 import { getPaymentMethodLabel } from "@/lib/payment-method";
+import type { OrderStatusValue } from "@/lib/client-enums";
 import {
     Select,
     SelectContent,
@@ -53,7 +53,7 @@ interface OrderTableProps {
 interface OrderTableRow {
     id: string;
     orderNumber: number;
-    status: OrderStatus;
+    status: OrderStatusValue;
     priority: string;
     quoteAmount: number | string;
     currency: string;
@@ -68,7 +68,7 @@ interface OrderTableRow {
     service: { name: string };
 }
 
-const statusMap: Record<OrderStatus, { label: string; className: string; icon: LucideIcon }> = {
+const statusMap: Record<OrderStatusValue, { label: string; className: string; icon: LucideIcon }> = {
     NEW_REQUEST: { label: "New", className: "bg-blue-500/10 text-blue-500 border-blue-500/20", icon: AlertCircle },
     QUALIFYING: { label: "Qualifying", className: "bg-purple-500/10 text-purple-500 border-purple-500/20", icon: Clock },
     WAITING_QUOTE_APPROVAL: { label: "Pending Approval", className: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20", icon: Clock },
@@ -139,7 +139,7 @@ export function OrderTable({ orders }: OrderTableProps) {
                 </div>
                 <div className="w-full sm:w-[320px] space-y-1">
                     <p className="text-xs font-medium text-zinc-400">Ban reason</p>
-                    <Select value={banReasonFilter} onValueChange={setBanReasonFilter}>
+                    <Select value={banReasonFilter} onValueChange={(value) => setBanReasonFilter(value ?? "all")}>
                         <SelectTrigger className="bg-zinc-900 border-zinc-800 text-white">
                             <SelectValue placeholder="Ban reason" />
                         </SelectTrigger>
@@ -176,7 +176,7 @@ export function OrderTable({ orders }: OrderTableProps) {
                     </TableRow>
                 ) : (
                     filteredOrders.map((order) => {
-                        const status = statusMap[order.status as OrderStatus] || statusMap.NEW_REQUEST;
+                        const status = statusMap[order.status as OrderStatusValue] || statusMap.NEW_REQUEST;
                         const StatusIcon = status.icon;
 
                         return (

@@ -17,7 +17,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { createClient, updateClient } from "@/lib/actions/clients";
 import { toast } from "sonner";
-import { Client } from "@prisma/client";
+import type { Client } from "@prisma/client";
 
 const clientSchema = z.object({
     fullName: z.string().min(1, "Full name is required"),

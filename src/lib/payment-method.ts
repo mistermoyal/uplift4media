@@ -1,6 +1,6 @@
-import { PaymentMethod } from "@prisma/client";
+import type { PaymentMethodValue } from "@/lib/client-enums";
 
-export const paymentMethodLabelMap: Record<PaymentMethod, string> = {
+export const paymentMethodLabelMap: Record<PaymentMethodValue, string> = {
     BANK_TRANSFER: "Bank transfer",
     CRYPTO: "Crypto",
     CASH: "Cash",
@@ -10,5 +10,5 @@ export const paymentMethodLabelMap: Record<PaymentMethod, string> = {
 };
 
 export function getPaymentMethodLabel(paymentMethod: string) {
-    return paymentMethodLabelMap[paymentMethod as PaymentMethod] ?? paymentMethod.replace(/_/g, " ").toLowerCase();
+    return paymentMethodLabelMap[paymentMethod as PaymentMethodValue] ?? paymentMethod.replace(/_/g, " ").toLowerCase();
 }

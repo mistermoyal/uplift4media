@@ -36,6 +36,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
     const session = await getServerSession(authOptions);
     const order = await getOrderById(orderId);
+    const sessionUserId = ((session?.user as { id?: string } | undefined)?.id) ?? "system";
 
     if (!order) {
         notFound();
@@ -66,7 +67,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                         clients={JSON.parse(JSON.stringify(clients))}
                         services={JSON.parse(JSON.stringify(services))}
                     />
-                    <StatusSelect orderId={order.id} currentStatus={order.status} userId={session?.user?.id || "system"} />
+                    <StatusSelect orderId={order.id} currentStatus={order.status} userId={sessionUserId} />
                 </div>
             </div>
 
@@ -217,7 +218,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                         </TabsContent>
                         <TabsContent value="notes" className="pt-4 mt-0">
                             <div className="space-y-6">
-                                <NoteForm orderId={order.id} authorId={session?.user?.id || "system"} />
+                                <NoteForm orderId={order.id} authorId={sessionUserId} />
                                 <Separator className="bg-zinc-800" />
                                 <div className="space-y-4">
                                     {order.notes.length === 0 ? (

@@ -1,4 +1,4 @@
-import { OrderStatus } from "@prisma/client";
+import type { OrderStatusValue } from "@/lib/client-enums";
 
 type StatusMeta = {
     label: string;
@@ -87,7 +87,7 @@ function fallbackStatusLabel(status: string) {
         .join(" ");
 }
 
-export function getOrderStatusMeta(status: string | OrderStatus) {
+export function getOrderStatusMeta(status: string | OrderStatusValue) {
     const value = String(status);
     return (
         STATUS_META[value] ?? {

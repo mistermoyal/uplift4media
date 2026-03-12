@@ -3,7 +3,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Platform } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -27,12 +26,13 @@ import { Loader2 } from "lucide-react";
 import { createService, updateService } from "@/lib/actions/services";
 import { toast } from "sonner";
 import type { Service } from "@prisma/client";
+import { platformValues, type PlatformValue } from "@/lib/client-enums";
 
 const serviceSchema = z.object({
     name: z.string().min(1, "Name is required"),
     slug: z.string().min(1, "Slug is required"),
     category: z.string().optional().or(z.literal("")),
-    platform: z.nativeEnum(Platform),
+    platform: z.enum(platformValues),
     description: z.string().optional().or(z.literal("")),
     isActive: z.boolean().default(true),
     requiresTargetUser: z.boolean().default(false),
@@ -52,12 +52,12 @@ export function ServiceForm({ initialData, onSuccess }: ServiceFormProps) {
     const [loading, setLoading] = useState(false);
 
     const form = useForm<ServiceFormValues>({
-        resolver: zodResolver(serviceSchema),
+        resolver: zodResolver(serviceSchema) as any,
         defaultValues: initialData ? {
             name: initialData.name ?? "",
             slug: initialData.slug ?? "",
             category: initialData.category ?? "",
-            platform: initialData.platform ?? Platform.INSTAGRAM,
+            platform: (initialData.platform as PlatformValue) ?? "INSTAGRAM",
             description: initialData.description ?? "",
             isActive: initialData.isActive ?? true,
             requiresTargetUser: initialData.requiresTargetUser ?? false,
@@ -68,7 +68,7 @@ export function ServiceForm({ initialData, onSuccess }: ServiceFormProps) {
             name: "",
             slug: "",
             category: "",
-            platform: Platform.INSTAGRAM,
+            platform: "INSTAGRAM",
             description: "",
             isActive: true,
             requiresTargetUser: false,
@@ -142,10 +142,10 @@ export function ServiceForm({ initialData, onSuccess }: ServiceFormProps) {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent className="bg-zinc-950 border-zinc-800 text-white">
-                                        <SelectItem value={Platform.INSTAGRAM}>Instagram</SelectItem>
-                                        <SelectItem value={Platform.TIKTOK}>TikTok</SelectItem>
-                                        <SelectItem value={Platform.FACEBOOK}>Facebook</SelectItem>
-                                        <SelectItem value={Platform.OTHER}>Other</SelectItem>
+                                        <SelectItem value="INSTAGRAM">Instagram</SelectItem>
+                                        <SelectItem value="TIKTOK">TikTok</SelectItem>
+                                        <SelectItem value="FACEBOOK">Facebook</SelectItem>
+                                        <SelectItem value="OTHER">Other</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />

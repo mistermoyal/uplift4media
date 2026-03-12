@@ -3,7 +3,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Platform, Priority, Currency, PaymentMethod } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -26,17 +25,25 @@ import { Loader2 } from "lucide-react";
 import { createOrder, updateOrder } from "@/lib/actions/orders";
 import { toast } from "sonner";
 import { paymentMethodLabelMap } from "@/lib/payment-method";
+import {
+    platformValues,
+    priorityValues,
+    currencyValues,
+    paymentMethodValues,
+    type PlatformValue,
+    type PriorityValue,
+} from "@/lib/client-enums";
 
 const notedTypeSchema = z.enum(["IP_DNR_COPYRIGHT", "GRO_SPECIALIZED_ENFORCEMENT_IG"]);
 
-const platformLabelMap: Record<Platform, string> = {
+const platformLabelMap: Record<PlatformValue, string> = {
     INSTAGRAM: "Instagram",
     TIKTOK: "TikTok",
     FACEBOOK: "Facebook",
     OTHER: "Other",
 };
 
-const priorityLabelMap: Record<Priority, string> = {
+const priorityLabelMap: Record<PriorityValue, string> = {
     LOW: "Low",
     NORMAL: "Normal",
     HIGH: "High",
@@ -55,16 +62,16 @@ const orderSchema = z.object({
     orderNumber: z.coerce.number().int().positive().optional(),
     clientId: z.string().min(1, "Client is required"),
     serviceId: z.string().min(1, "Service is required"),
-    platform: z.nativeEnum(Platform),
+    platform: z.enum(platformValues),
     targetUsername: z.string().optional().or(z.literal("")),
     targetEmail: z.string().optional().or(z.literal("")),
     targetPhone: z.string().optional().or(z.literal("")),
     profileUrl: z.string().optional().or(z.literal("")),
     quoteAmount: z.coerce.number().min(0),
     internalCost: z.coerce.number().min(0),
-    currency: z.nativeEnum(Currency).default(Currency.USD),
-    paymentMethod: z.nativeEnum(PaymentMethod).default(PaymentMethod.BANK_TRANSFER),
-    priority: z.nativeEnum(Priority).default(Priority.NORMAL),
+    currency: z.enum(currencyValues).default("USD"),
+    paymentMethod: z.enum(paymentMethodValues).default("BANK_TRANSFER"),
+    priority: z.enum(priorityValues).default("NORMAL"),
     source: z.string().optional().or(z.literal("")),
     intakeNotes: z.string().optional().or(z.literal("")),
     estimatedDelivery: z.string().optional().or(z.literal("")),
@@ -98,21 +105,21 @@ export function OrderForm({ clients, services, mode = "create", orderId, initial
     const previousServiceIdRef = useRef(initialValues?.serviceId ?? "");
 
     const form = useForm<OrderFormValues>({
-        resolver: zodResolver(orderSchema),
+        resolver: zodResolver(orderSchema) as any,
         defaultValues: {
             orderNumber: initialValues?.orderNumber,
             clientId: initialValues?.clientId ?? "",
             serviceId: initialValues?.serviceId ?? "",
-            platform: initialValues?.platform ?? Platform.INSTAGRAM,
+            platform: initialValues?.platform ?? "INSTAGRAM",
             targetUsername: initialValues?.targetUsername ?? "",
             targetEmail: initialValues?.targetEmail ?? "",
             targetPhone: initialValues?.targetPhone ?? "",
             profileUrl: initialValues?.profileUrl ?? "",
             quoteAmount: initialValues?.quoteAmount ?? 0,
             internalCost: initialValues?.internalCost ?? 0,
-            currency: initialValues?.currency ?? Currency.USD,
-            paymentMethod: initialValues?.paymentMethod ?? PaymentMethod.BANK_TRANSFER,
-            priority: initialValues?.priority ?? Priority.NORMAL,
+            currency: initialValues?.currency ?? "USD",
+            paymentMethod: initialValues?.paymentMethod ?? "BANK_TRANSFER",
+            priority: initialValues?.priority ?? "NORMAL",
             source: initialValues?.source ?? "WhatsApp",
             intakeNotes: initialValues?.intakeNotes ?? "",
             estimatedDelivery: initialValues?.estimatedDelivery ?? "",
@@ -141,7 +148,7 @@ export function OrderForm({ clients, services, mode = "create", orderId, initial
     }, [serviceId, services, form, mode]);
 
     const isInstagramUnbanCase = !!selectedService
-        && selectedService.platform === Platform.INSTAGRAM;
+        && selectedService.platform === "INSTAGRAM";
 
     useEffect(() => {
         if (selectedService && !isInstagramUnbanCase) {
@@ -268,10 +275,10 @@ export function OrderForm({ clients, services, mode = "create", orderId, initial
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent className="bg-zinc-950 border-zinc-800 text-white">
-                                        <SelectItem value={Currency.USD}>USD ($)</SelectItem>
-                                        <SelectItem value={Currency.EUR}>EUR (€)</SelectItem>
-                                        <SelectItem value={Currency.CAD}>CAD (C$)</SelectItem>
-                                        <SelectItem value={Currency.AED}>AED (د.إ)</SelectItem>
+                                        <SelectItem value="USD">USD ($)</SelectItem>
+                                        <SelectItem value="EUR">EUR (€)</SelectItem>
+                                        <SelectItem value="CAD">CAD (C$)</SelectItem>
+                                        <SelectItem value="AED">AED (د.إ)</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -293,12 +300,12 @@ export function OrderForm({ clients, services, mode = "create", orderId, initial
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent className="bg-zinc-950 border-zinc-800 text-white">
-                                        <SelectItem value={PaymentMethod.BANK_TRANSFER} label="Bank transfer">Bank transfer</SelectItem>
-                                        <SelectItem value={PaymentMethod.CRYPTO} label="Crypto">Crypto</SelectItem>
-                                        <SelectItem value={PaymentMethod.CASH} label="Cash">Cash</SelectItem>
-                                        <SelectItem value={PaymentMethod.STRIPE} label="Stripe">Stripe</SelectItem>
-                                        <SelectItem value={PaymentMethod.PAYPAL} label="PayPal">PayPal</SelectItem>
-                                        <SelectItem value={PaymentMethod.OTHER} label="Other">Other</SelectItem>
+                                        <SelectItem value="BANK_TRANSFER" label="Bank transfer">Bank transfer</SelectItem>
+                                        <SelectItem value="CRYPTO" label="Crypto">Crypto</SelectItem>
+                                        <SelectItem value="CASH" label="Cash">Cash</SelectItem>
+                                        <SelectItem value="STRIPE" label="Stripe">Stripe</SelectItem>
+                                        <SelectItem value="PAYPAL" label="PayPal">PayPal</SelectItem>
+                                        <SelectItem value="OTHER" label="Other">Other</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -348,10 +355,10 @@ export function OrderForm({ clients, services, mode = "create", orderId, initial
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent className="bg-zinc-950 border-zinc-800 text-white">
-                                        <SelectItem value={Platform.INSTAGRAM} label="Instagram">Instagram</SelectItem>
-                                        <SelectItem value={Platform.TIKTOK} label="TikTok">TikTok</SelectItem>
-                                        <SelectItem value={Platform.FACEBOOK} label="Facebook">Facebook</SelectItem>
-                                        <SelectItem value={Platform.OTHER} label="Other">Other</SelectItem>
+                                        <SelectItem value="INSTAGRAM" label="Instagram">Instagram</SelectItem>
+                                        <SelectItem value="TIKTOK" label="TikTok">TikTok</SelectItem>
+                                        <SelectItem value="FACEBOOK" label="Facebook">Facebook</SelectItem>
+                                        <SelectItem value="OTHER" label="Other">Other</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -373,10 +380,10 @@ export function OrderForm({ clients, services, mode = "create", orderId, initial
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent className="bg-zinc-950 border-zinc-800 text-white">
-                                        <SelectItem value={Priority.LOW} label="Low">Low</SelectItem>
-                                        <SelectItem value={Priority.NORMAL} label="Normal">Normal</SelectItem>
-                                        <SelectItem value={Priority.HIGH} label="High">High</SelectItem>
-                                        <SelectItem value={Priority.URGENT} label="Urgent">Urgent</SelectItem>
+                                        <SelectItem value="LOW" label="Low">Low</SelectItem>
+                                        <SelectItem value="NORMAL" label="Normal">Normal</SelectItem>
+                                        <SelectItem value="HIGH" label="High">High</SelectItem>
+                                        <SelectItem value="URGENT" label="Urgent">Urgent</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
