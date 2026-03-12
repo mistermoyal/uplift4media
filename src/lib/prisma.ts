@@ -5,6 +5,9 @@ import { Pool } from "pg";
 const connectionString = `${process.env.DATABASE_URL}`;
 const shouldUseTls =
   /supabase\.co/i.test(connectionString) || /sslmode=require/i.test(connectionString);
+if (shouldUseTls && process.env.NODE_TLS_REJECT_UNAUTHORIZED === undefined) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+}
 
 const globalForPrisma = global as unknown as {
   prisma: PrismaClient | undefined,
