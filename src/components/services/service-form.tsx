@@ -25,8 +25,21 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { createService, updateService } from "@/lib/actions/services";
 import { toast } from "sonner";
-import type { Service } from "@prisma/client";
 import { platformValues, type PlatformValue } from "@/lib/client-enums";
+
+type ServiceInitialData = {
+    id: string;
+    name?: string | null;
+    slug?: string | null;
+    category?: string | null;
+    platform?: PlatformValue | null;
+    description?: string | null;
+    isActive?: boolean | null;
+    requiresTargetUser?: boolean | null;
+    requiresEmail?: boolean | null;
+    requiresPhone?: boolean | null;
+    requiresCaseNotes?: boolean | null;
+} | null;
 
 const serviceSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -44,7 +57,7 @@ const serviceSchema = z.object({
 type ServiceFormValues = z.infer<typeof serviceSchema>;
 
 interface ServiceFormProps {
-    initialData?: Service | null;
+    initialData?: ServiceInitialData;
     onSuccess: () => void;
 }
 

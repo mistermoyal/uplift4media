@@ -11,7 +11,6 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import type { Service } from "@prisma/client";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,12 +35,24 @@ import { toast } from "sonner";
 import type { PlatformValue } from "@/lib/client-enums";
 
 interface ServiceTableProps {
-    services: Service[];
+    services: ServiceTableItem[];
 }
+
+type ServiceTableItem = {
+    id: string;
+    name: string;
+    category: string | null;
+    platform: PlatformValue;
+    isActive: boolean;
+    requiresTargetUser: boolean;
+    requiresEmail: boolean;
+    requiresPhone: boolean;
+    requiresCaseNotes: boolean;
+};
 
 export function ServiceTable({ services }: ServiceTableProps) {
     const router = useRouter();
-    const [editingService, setEditingService] = useState<Service | null>(null);
+    const [editingService, setEditingService] = useState<ServiceTableItem | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const platformColors: Record<PlatformValue, string> = {
@@ -51,7 +62,7 @@ export function ServiceTable({ services }: ServiceTableProps) {
         OTHER: "bg-zinc-500/10 text-zinc-500 border-zinc-500/20",
     };
 
-    const handleDelete = async (service: Service) => {
+    const handleDelete = async (service: ServiceTableItem) => {
         const confirmed = window.confirm(`Delete service "${service.name}"?`);
         if (!confirmed) return;
 

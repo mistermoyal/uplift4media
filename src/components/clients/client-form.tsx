@@ -17,7 +17,19 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { createClient, updateClient } from "@/lib/actions/clients";
 import { toast } from "sonner";
-import type { Client } from "@prisma/client";
+
+type ClientInitialData = {
+    id: string;
+    fullName?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    country?: string | null;
+    companyName?: string | null;
+    instagramUsername?: string | null;
+    tiktokUsername?: string | null;
+    facebookProfile?: string | null;
+    notes?: string | null;
+} | null;
 
 const clientSchema = z.object({
     fullName: z.string().min(1, "Full name is required"),
@@ -34,7 +46,7 @@ const clientSchema = z.object({
 type ClientFormValues = z.infer<typeof clientSchema>;
 
 interface ClientFormProps {
-    initialData?: Client | null;
+    initialData?: ClientInitialData;
     onSuccess: () => void;
 }
 
