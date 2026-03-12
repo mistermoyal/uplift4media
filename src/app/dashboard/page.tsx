@@ -15,15 +15,14 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Order, Client, Service } from "@prisma/client";
 import { getOrderStatusMeta } from "@/lib/order-status";
 import { getProfileDisplay, getProfileUrl } from "@/lib/profile-links";
 import { convertToUsd, convertUsdToEur, getUsdRates } from "@/lib/fx";
 
 export default async function DashboardPage() {
-    const orders = await getOrders() as (Order & { client: Client, service: Service })[];
-    const clients = await getClients() as Client[];
-    const services = await getServices() as Service[];
+    const orders = await getOrders();
+    const clients = await getClients();
+    const services = await getServices();
     const usdRates = await getUsdRates();
 
     // Simple stats
