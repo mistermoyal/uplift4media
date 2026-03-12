@@ -4,12 +4,12 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -76,7 +76,7 @@ enum Platform {
 
 model Order {
   id               String        @id @default(cuid())
-  orderNumber      Int           @unique @default(autoincrement())
+  orderNumber      Int           @unique
   clientId         String
   client           Client        @relation(fields: [clientId], references: [id])
   serviceId        String
@@ -90,7 +90,8 @@ model Order {
   
   quoteAmount      Decimal       @db.Decimal(10, 2)
   internalCost     Decimal       @db.Decimal(10, 2)
-  currency         String        @default("USD")
+  currency         Currency      @default(USD)
+  paymentMethod    PaymentMethod @default(BANK_TRANSFER)
   
   paymentStatus    PaymentStatus @default(UNPAID)
   quoteStatus      QuoteStatus   @default(DRAFT)
@@ -99,6 +100,9 @@ model Order {
   
   source           String?       // WhatsApp, Instagram, etc.
   intakeNotes      String?       @db.Text
+  banReason        String?       @db.Text
+  isNoted          Boolean       @default(false)
+  notedType        NotedType?
   
   assignedUserId   String?
   assignedUser     User?         @relation("AssignedUser", fields: [assignedUserId], references: [id])
@@ -106,6 +110,7 @@ model Order {
   notes            Note[]
   activities       Activity[]
   
+  estimatedDelivery String?
   dueDate          DateTime?
   completedAt      DateTime?
   cancelledAt      DateTime?
@@ -113,10 +118,65 @@ model Order {
   updatedAt        DateTime      @updatedAt
 }
 
-enum QuoteStatus { DRAFT, QUOTE_SENT, QUOTE_ACCEPTED, QUOTE_REJECTED, QUOTE_EXPIRED }
-enum PaymentStatus { UNPAID, PARTIAL, PAID, REFUNDED }
-enum OrderStatus { NEW_REQUEST, QUALIFYING, WAITING_QUOTE_APPROVAL, QUOTE_ACCEPTED, PAYMENT_PENDING, READY_TO_START, IN_PROGRESS, WAITING_PROVIDER, WAITING_CLIENT, ON_HOLD, COMPLETED, FAILED, CANCELLED }
-enum Priority { LOW, NORMAL, HIGH, URGENT }
+enum NotedType {
+  IP_DNR_COPYRIGHT
+  GRO_SPECIALIZED_ENFORCEMENT_IG
+}
+
+enum QuoteStatus {
+  DRAFT
+  QUOTE_SENT
+  QUOTE_ACCEPTED
+  QUOTE_REJECTED
+  QUOTE_EXPIRED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
+  REFUNDED
+}
+
+enum OrderStatus {
+  NEW_REQUEST
+  QUALIFYING
+  WAITING_QUOTE_APPROVAL
+  QUOTE_ACCEPTED
+  PAYMENT_PENDING
+  PAYMENT_SENT_WAITING_RECEIPT
+  READY_TO_START
+  IN_PROGRESS
+  WAITING_PROVIDER
+  WAITING_CLIENT
+  ON_HOLD
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum Currency {
+  USD
+  EUR
+  CAD
+  AED
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  CRYPTO
+  CASH
+  STRIPE
+  PAYPAL
+  OTHER
+}
 
 model Note {
   id        String   @id @default(cuid())
