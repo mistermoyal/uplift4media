@@ -18,11 +18,40 @@ import { cn } from "@/lib/utils";
 import { getOrderStatusMeta } from "@/lib/order-status";
 import { getProfileDisplay, getProfileUrl } from "@/lib/profile-links";
 import { convertToUsd, convertUsdToEur, getUsdRates } from "@/lib/fx";
+import { Separator } from "@/components/ui/separator";
+import type { CurrencyValue } from "@/lib/client-enums";
+
+type DashboardOrder = {
+    id: string;
+    quoteAmount: number | string;
+    internalCost: number | string;
+    currency: CurrencyValue;
+    paymentStatus: string;
+    status: string;
+    priority: string;
+    platform: string;
+    targetUsername: string | null;
+    isNoted: boolean;
+    notedType: string | null;
+    banReason: string | null;
+    createdAt: string | Date;
+    client: { fullName: string };
+    service: { name: string };
+};
+
+type DashboardClient = {
+    createdAt: string | Date;
+};
+
+type DashboardService = {
+    isActive: boolean;
+    platform: string;
+};
 
 export default async function DashboardPage() {
-    const orders = await getOrders();
-    const clients = await getClients();
-    const services = await getServices();
+    const orders = await getOrders() as unknown as DashboardOrder[];
+    const clients = await getClients() as unknown as DashboardClient[];
+    const services = await getServices() as unknown as DashboardService[];
     const usdRates = await getUsdRates();
 
     // Simple stats
@@ -42,8 +71,8 @@ export default async function DashboardPage() {
     );
     const grossRevenueEur = convertUsdToEur(grossRevenueUsd, usdRates);
 
-    const pendingOrders = orders.filter(o => o.status !== "COMPLETED" && o.status !== "FAILED" && o.status !== "CANCELLED").length;
-    const completedOrders = orders.filter(o => o.status === "COMPLETED").length;
+    const pendingOrders = orders.filter((order) => order.status !== "COMPLETED" && order.status !== "FAILED" && order.status !== "CANCELLED").length;
+    const completedOrders = orders.filter((order) => order.status === "COMPLETED").length;
 
     const recentOrders = orders.slice(0, 5);
     const oneWeekAgo = new Date();
@@ -92,7 +121,7 @@ export default async function DashboardPage() {
                     <CardContent>
                         <div className="text-2xl font-bold">{activeServices}</div>
                         <p className="text-[10px] text-zinc-600 mt-1">
-                            Across {new Set(services.map(s => s.platform)).size} platforms
+                            Across {new Set(services.map((service) => service.platform)).size} platforms
                         </p>
                     </CardContent>
                 </Card>
@@ -242,7 +271,7 @@ export default async function DashboardPage() {
                                     <AlertCircle className="h-3 w-3 text-red-500/50" />
                                     <span>Urgent Cases</span>
                                 </div>
-                                <span className="text-xs text-zinc-400 font-mono tracking-tighter">{orders.filter(o => o.priority === "URGENT" || o.priority === "HIGH").length}</span>
+                                <span className="text-xs text-zinc-400 font-mono tracking-tighter">{orders.filter((order) => order.priority === "URGENT" || order.priority === "HIGH").length}</span>
                             </div>
                             <Separator className="bg-zinc-800" />
                             <div className="pt-2">
@@ -257,5 +286,3 @@ export default async function DashboardPage() {
         </div>
     );
 }
-
-import { Separator } from "@/components/ui/separator";
