@@ -18,6 +18,10 @@ import {
     AlertCircle,
     CheckCircle2,
     XCircle,
+    Instagram,
+    Facebook,
+    Music2,
+    Globe2,
     type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -90,9 +94,14 @@ export function OrderTable({ orders }: OrderTableProps) {
     const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
     const [notedFilter, setNotedFilter] = useState<"all" | "yes" | "no">("all");
     const [banReasonFilter, setBanReasonFilter] = useState<string>("all");
+    const [platformFilter, setPlatformFilter] = useState<string>("all");
 
     const banReasons = useMemo(
         () => Array.from(new Set(orders.map((order) => order.banReason).filter((reason): reason is string => Boolean(reason)))),
+        [orders]
+    );
+    const platforms = useMemo(
+        () => Array.from(new Set(orders.map((order) => order.platform).filter(Boolean))).sort(),
         [orders]
     );
 
@@ -101,9 +110,10 @@ export function OrderTable({ orders }: OrderTableProps) {
             if (notedFilter === "yes" && !order.isNoted) return false;
             if (notedFilter === "no" && order.isNoted) return false;
             if (banReasonFilter !== "all" && order.banReason !== banReasonFilter) return false;
+            if (platformFilter !== "all" && order.platform !== platformFilter) return false;
             return true;
         });
-    }, [orders, notedFilter, banReasonFilter]);
+    }, [orders, notedFilter, banReasonFilter, platformFilter]);
 
     const handleDeleteOrder = async (orderId: string, orderNumber: number) => {
         const confirmed = window.confirm(`Delete order ORD-${orderNumber.toString().padStart(4, "0")}? This cannot be undone.`);
@@ -153,6 +163,22 @@ export function OrderTable({ orders }: OrderTableProps) {
                         </SelectContent>
                     </Select>
                 </div>
+                <div className="w-full sm:w-[220px] space-y-1">
+                    <p className="text-xs font-medium text-zinc-400">Platform</p>
+                    <Select value={platformFilter} onValueChange={(value) => setPlatformFilter(value ?? "all")}>
+                        <SelectTrigger className="bg-zinc-900 border-zinc-800 text-white">
+                            <SelectValue placeholder="Platform" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-950 border-zinc-800 text-white">
+                            <SelectItem value="all">All platforms</SelectItem>
+                            {platforms.map((platform) => (
+                                <SelectItem key={platform} value={platform}>
+                                    {platform.charAt(0) + platform.slice(1).toLowerCase()}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
 
             <Table>
@@ -178,6 +204,14 @@ export function OrderTable({ orders }: OrderTableProps) {
                     filteredOrders.map((order) => {
                         const status = statusMap[order.status as OrderStatusValue] || statusMap.NEW_REQUEST;
                         const StatusIcon = status.icon;
+                        const PlatformIcon =
+                            order.platform === "INSTAGRAM"
+                                ? Instagram
+                                : order.platform === "FACEBOOK"
+                                    ? Facebook
+                                    : order.platform === "TIKTOK"
+                                        ? Music2
+                                        : Globe2;
 
                         return (
                             <TableRow key={order.id} className="border-zinc-800 hover:bg-zinc-900/40 transition-colors">
@@ -187,7 +221,10 @@ export function OrderTable({ orders }: OrderTableProps) {
                                 <TableCell>
                                     <div className="flex flex-col">
                                         <span className="text-sm font-medium text-white">{order.client.fullName}</span>
-                                        <span className="text-xs text-zinc-500">{order.service.name} ({order.platform})</span>
+                                        <span className="text-xs text-zinc-500 inline-flex items-center gap-1.5">
+                                            <PlatformIcon className="h-3.5 w-3.5" />
+                                            {order.service.name} ({order.platform})
+                                        </span>
                                         {order.targetUsername && (
                                             <a
                                                 href={getProfileUrl(order.platform, order.targetUsername) || "#"}
