@@ -121,6 +121,7 @@ model Order {
 enum NotedType {
   IP_DNR_COPYRIGHT
   GRO_SPECIALIZED_ENFORCEMENT_IG
+  ISS_LEGAL
 }
 
 enum QuoteStatus {

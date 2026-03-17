@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { OrderStatus, PaymentStatus, QuoteStatus, Priority, Platform, Currency, PaymentMethod } from "@prisma/client";
 
-const notedTypeSchema = z.enum(["IP_DNR_COPYRIGHT", "GRO_SPECIALIZED_ENFORCEMENT_IG"]);
+const notedTypeSchema = z.enum(["IP_DNR_COPYRIGHT", "GRO_SPECIALIZED_ENFORCEMENT_IG", "ISS_LEGAL"]);
 
 const orderSchema = z.object({
     clientId: z.string().min(1, "Client is required"),

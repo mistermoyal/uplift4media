@@ -34,7 +34,7 @@ import {
     type PriorityValue,
 } from "@/lib/client-enums";
 
-const notedTypeSchema = z.enum(["IP_DNR_COPYRIGHT", "GRO_SPECIALIZED_ENFORCEMENT_IG"]);
+const notedTypeSchema = z.enum(["IP_DNR_COPYRIGHT", "GRO_SPECIALIZED_ENFORCEMENT_IG", "ISS_LEGAL"]);
 
 const platformLabelMap: Record<PlatformValue, string> = {
     INSTAGRAM: "Instagram",
@@ -521,6 +521,7 @@ export function OrderForm({ clients, services, mode = "create", orderId, initial
                                                     <SelectContent className="bg-zinc-950 border-zinc-800 text-white">
                                                         <SelectItem value="IP_DNR_COPYRIGHT">IP_DNR_COPYRIGHT</SelectItem>
                                                         <SelectItem value="GRO_SPECIALIZED_ENFORCEMENT_IG">GRO_SPECIALIZED_ENFORCEMENT_IG</SelectItem>
+                                                        <SelectItem value="ISS_LEGAL">ISS_LEGAL</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />
