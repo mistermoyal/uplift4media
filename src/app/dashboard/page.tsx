@@ -66,7 +66,7 @@ export default async function DashboardPage() {
         .filter((order) => order.paymentStatus !== "UNPAID" || order.status === "COMPLETED")
         .reduce((acc, order) => acc + convertToUsd(Number(order.quoteAmount), order.currency, usdRates), 0);
     const totalExpenseUsd = orders.reduce(
-        (acc, order) => acc + convertToUsd(Number(order.internalCost), order.currency, usdRates),
+        (acc, order) => acc + Number(order.internalCost),
         0
     );
     const grossRevenueEur = convertUsdToEur(grossRevenueUsd, usdRates);
@@ -165,7 +165,7 @@ export default async function DashboardPage() {
                         <div className="text-xl font-bold">
                             {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalExpenseUsd)}
                         </div>
-                        <p className="text-[10px] text-zinc-600 mt-1">Converted from internal costs</p>
+                        <p className="text-[10px] text-zinc-600 mt-1">Internal costs are treated as USD</p>
                     </CardContent>
                 </Card>
                 <Card className="bg-zinc-950 border-zinc-800 text-white shadow-lg">

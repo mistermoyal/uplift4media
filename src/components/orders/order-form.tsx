@@ -424,7 +424,7 @@ export function OrderForm({ clients, services, mode = "create", orderId, initial
                         name="internalCost"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-zinc-400">Internal Cost</FormLabel>
+                                <FormLabel className="text-zinc-400">Internal Cost (USD)</FormLabel>
                                 <FormControl>
                                     <Input {...field} type="number" step="0.01" className="bg-zinc-900 border-zinc-800" />
                                 </FormControl>
