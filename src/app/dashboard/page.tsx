@@ -63,7 +63,7 @@ export default async function DashboardPage() {
         0
     );
     const totalInvoicedUsd = orders
-        .filter((order) => order.paymentStatus !== "UNPAID")
+        .filter((order) => order.paymentStatus !== "UNPAID" || order.status === "COMPLETED")
         .reduce((acc, order) => acc + convertToUsd(Number(order.quoteAmount), order.currency, usdRates), 0);
     const totalExpenseUsd = orders.reduce(
         (acc, order) => acc + convertToUsd(Number(order.internalCost), order.currency, usdRates),
@@ -154,7 +154,7 @@ export default async function DashboardPage() {
                         <div className="text-xl font-bold">
                             {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalInvoicedUsd)}
                         </div>
-                        <p className="text-[10px] text-zinc-600 mt-1">Orders with payment status not unpaid</p>
+                        <p className="text-[10px] text-zinc-600 mt-1">Paid orders and completed orders</p>
                     </CardContent>
                 </Card>
                 <Card className="bg-zinc-950 border-zinc-800 text-white shadow-lg">
